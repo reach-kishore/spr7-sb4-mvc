@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: spr7-sb4-mvc
+  h2.console.enabled: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    kishore.spring.spr7_sb4_mvc: INFO
