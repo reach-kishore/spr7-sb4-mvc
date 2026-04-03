@@ -1,21 +1,16 @@
 package kishore.spring.spr7_sb4_mvc.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
-@NoArgsConstructor // Required by JPA specification
-@AllArgsConstructor
 @Builder
 @Data
-public class Beer {
+public class BeerDTO {
 
-    @Id
     private UUID id;
     private Integer version;
     private String beerName;

@@ -1,15 +1,21 @@
 package kishore.spring.spr7_sb4_mvc.services;
 
-import kishore.spring.spr7_sb4_mvc.model.Customer;
+import kishore.spring.spr7_sb4_mvc.model.CustomerDTO;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 public interface CustomerService {
 
-    List<Customer> listCustomers();
+    List<CustomerDTO> listCustomers();
 
-    Customer getCustomer(int customerId);
+    Optional<CustomerDTO> getCustomer(int customerId);
 
-    void addCustomer(Customer customer);
+    CustomerDTO addCustomer(CustomerDTO customerDTO);
+
+    Optional<CustomerDTO> updateCustomerById(int customerId, CustomerDTO customer);
+
+    boolean deleteCustomerById(int customerId);
+
+    void patchCustomerById(int customerId, CustomerDTO customer);
 }

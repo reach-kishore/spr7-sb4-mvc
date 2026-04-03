@@ -1,10 +1,12 @@
 package kishore.spring.spr7_sb4_mvc.controllers;
 
+import kishore.spring.spr7_sb4_mvc.entities.Beer;
 import kishore.spring.spr7_sb4_mvc.exceptions.CustomNotFoundException;
-import kishore.spring.spr7_sb4_mvc.model.Beer;
+import kishore.spring.spr7_sb4_mvc.model.BeerDTO;
 import kishore.spring.spr7_sb4_mvc.services.BeerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,28 +17,56 @@ import java.util.UUID;
 @RestController
 @AllArgsConstructor
 @Slf4j
-@RequestMapping("/api/v1/beer")
 public class BeerController {
+
+    public static final String BEER_PATH = "/api/v1/beer";
+    public static final String BEER_PATH_ID = BEER_PATH+"/{beerId}";
 
     private final BeerService beerService;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public List<Beer> getAllbeers(){
+    @PatchMapping(BEER_PATH_ID)
+    public ResponseEntity updateBeerPatchById(@PathVariable("beerId") UUID beerId, @RequestBody BeerDTO beerDTO) {
+        beerService.patchBeerById(beerId, beerDTO);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping(BEER_PATH_ID)
+    public ResponseEntity deleteBeerById(@PathVariable("beerId") UUID beerId) {
+        if(!beerService.deleteById(beerId)) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        };
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping(BEER_PATH_ID)
+    public ResponseEntity updateById(@PathVariable("beerId") UUID beerId, @RequestBody BeerDTO beerDTO) {
+        if(beerService.updateBeerById(beerId, beerDTO).isEmpty()){
+            throw new CustomNotFoundException();
+        };
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping(BEER_PATH)
+    public List<BeerDTO> getAllbeers(){
         log.debug("Get All Beers - Controller");
         return beerService.listBeers();
     }
 
-    @RequestMapping(value = "/{beerId}", method =  RequestMethod.GET)
-    public Beer getBeerById(@PathVariable("beerId") UUID beerId) {
+    @GetMapping(BEER_PATH_ID)
+    public BeerDTO getBeerById(@PathVariable("beerId") UUID beerId) {
         log.debug("Get Beer By ID - Controller");
         return beerService.getBeerbyId(beerId).orElseThrow(CustomNotFoundException::new);
     }
 
-    @PostMapping
-    public ResponseEntity addBeer(@RequestBody Beer beer) {
+    @PostMapping(BEER_PATH)
+    public ResponseEntity addBeer(@RequestBody BeerDTO beerDTO) {
         log.debug("Add Beer - Controller");
-        beerService.addBeer(beer);
-        return new ResponseEntity(HttpStatus.CREATED);
+        BeerDTO beer = beerService.addBeer(beerDTO);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location", BEER_PATH + "/" + beer.getId().toString());
+
+        return new ResponseEntity(headers, HttpStatus.CREATED);
     }
 
     /**

@@ -1,11 +1,9 @@
 package kishore.spring.spr7_sb4_mvc.controllers.mvctests;
 
 import kishore.spring.spr7_sb4_mvc.controllers.BeerController;
-import kishore.spring.spr7_sb4_mvc.exceptions.CustomNotFoundException;
-import kishore.spring.spr7_sb4_mvc.model.Beer;
+import kishore.spring.spr7_sb4_mvc.model.BeerDTO;
 import kishore.spring.spr7_sb4_mvc.model.BeerStyle;
 import kishore.spring.spr7_sb4_mvc.services.BeerService;
-import kishore.spring.spr7_sb4_mvc.services.impl.BeerServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -35,7 +33,7 @@ public class BeerControllerMvcTest {
 
     @Test
     void testGetBeerById() throws Exception {
-        Beer mockBeer = Beer.builder()
+        BeerDTO mockBeerDTO = BeerDTO.builder()
                 .id(UUID.randomUUID())
                 .version(1)
                 .beerName("Corona Extra")
@@ -47,14 +45,21 @@ public class BeerControllerMvcTest {
                 .updateDt(LocalDateTime.now())
                 .build();
 
-        given(beerService.getBeerbyId(any(UUID.class))).willReturn(Optional.of(mockBeer));
+        given(beerService.getBeerbyId(any(UUID.class))).willReturn(Optional.of(mockBeerDTO));
 
-        mockMvc.perform(get("/api/v1/beer/" + mockBeer.getId())
+        mockMvc.perform(get(BeerController.BEER_PATH_ID, mockBeerDTO.getId())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(mockBeerDTO.getId().toString())))
+                .andExpect(jsonPath("$.beerName", is(mockBeerDTO.getBeerName())));
+
+        mockMvc.perform(get("/api/v1/beer/" + mockBeerDTO.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(mockBeer.getId().toString())))
-                .andExpect(jsonPath("$.beerName", is(mockBeer.getBeerName())));
+                .andExpect(jsonPath("$.id", is(mockBeerDTO.getId().toString())))
+                .andExpect(jsonPath("$.beerName", is(mockBeerDTO.getBeerName())));
     }
 
     @Test

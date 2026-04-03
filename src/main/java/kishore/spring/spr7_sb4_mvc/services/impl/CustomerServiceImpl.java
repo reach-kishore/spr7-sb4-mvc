@@ -1,6 +1,6 @@
 package kishore.spring.spr7_sb4_mvc.services.impl;
 
-import kishore.spring.spr7_sb4_mvc.model.Customer;
+import kishore.spring.spr7_sb4_mvc.model.CustomerDTO;
 import kishore.spring.spr7_sb4_mvc.services.CustomerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,55 +12,71 @@ import java.util.*;
 @Slf4j
 public class CustomerServiceImpl implements CustomerService {
 
-    private Map<Integer, Customer> customers;
+    private Map<Integer, CustomerDTO> customers;
 
     public CustomerServiceImpl() {
         customers = new HashMap();
-        Customer customer1 = Customer.builder()
+        CustomerDTO customerDTO1 = CustomerDTO.builder()
                 .customerId(1)
                 .customerName("Cust 111")
                 .version("1")
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
-        Customer customer2 = Customer.builder()
+        CustomerDTO customerDTO2 = CustomerDTO.builder()
                 .customerId(2)
                 .customerName("Cust 2")
                 .version("1")
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
-        Customer customer3 = Customer.builder()
+        CustomerDTO customerDTO3 = CustomerDTO.builder()
                 .customerId(3)
                 .customerName("Cust 3")
                 .version("1")
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
-        customers.put(customer1.getCustomerId(), customer1);
-        customers.put(customer2.getCustomerId(), customer2);
-        customers.put(customer3.getCustomerId(), customer3);
+        customers.put(customerDTO1.getCustomerId(), customerDTO1);
+        customers.put(customerDTO2.getCustomerId(), customerDTO2);
+        customers.put(customerDTO3.getCustomerId(), customerDTO3);
     }
 
     @Override
-    public List<Customer> listCustomers() {
+    public List<CustomerDTO> listCustomers() {
         return new ArrayList<>(customers.values());
     }
 
     @Override
-    public Customer getCustomer(int customerId) {
-        return customers.get(customerId);
+    public Optional<CustomerDTO> getCustomer(int customerId) {
+        return Optional.ofNullable(customers.get(customerId));
     }
 
     @Override
-    public void addCustomer(Customer customer) {
-        Customer newCustomer = Customer.builder()
-                .customerId(customer.getCustomerId())
-                .customerName(customer.getCustomerName())
-                .version(customer.getVersion())
+    public CustomerDTO addCustomer(CustomerDTO customerDTO) {
+        CustomerDTO newCustomerDTO = CustomerDTO.builder()
+                .customerId(customerDTO.getCustomerId())
+                .customerName(customerDTO.getCustomerName())
+                .version(customerDTO.getVersion())
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
                 .build();
-        customers.put(customer.getCustomerId(), newCustomer);
+        customers.put(customerDTO.getCustomerId(), newCustomerDTO);
+        return customerDTO;
+    }
+
+    @Override
+    public Optional<CustomerDTO> updateCustomerById(int customerId, CustomerDTO customer) {
+        return null;
+    }
+
+    @Override
+    public boolean deleteCustomerById(int customerId) {
+        return false;
+    }
+
+    @Override
+    public void patchCustomerById(int customerId, CustomerDTO customer) {
+
     }
 }
