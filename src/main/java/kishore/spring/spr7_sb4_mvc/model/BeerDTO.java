@@ -1,5 +1,7 @@
 package kishore.spring.spr7_sb4_mvc.model;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,6 +15,8 @@ public class BeerDTO {
 
     private UUID id;
     private Integer version;
+    @NotNull
+    @NotBlank
     private String beerName;
     private BeerStyle beerStyle;
     private String upc;

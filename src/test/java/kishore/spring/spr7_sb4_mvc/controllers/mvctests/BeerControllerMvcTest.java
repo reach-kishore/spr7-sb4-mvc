@@ -10,8 +10,10 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.core.Is.is;
 
@@ -25,49 +27,68 @@ import java.util.UUID;
 @WebMvcTest(BeerController.class)
 public class BeerControllerMvcTest {
 
-    @Autowired
-    MockMvc mockMvc;
+  @Autowired MockMvc mockMvc;
 
-    @MockitoBean
-    BeerService beerService;
+  @MockitoBean BeerService beerService;
 
-    @Test
-    void testGetBeerById() throws Exception {
-        BeerDTO mockBeerDTO = BeerDTO.builder()
-                .id(UUID.randomUUID())
-                .version(1)
-                .beerName("Corona Extra")
-                .beerStyle(BeerStyle.LAGER)
-                .upc("123")
-                .price(new BigDecimal("4.00"))
-                .quantity(100)
-                .createdDt(LocalDateTime.now())
-                .updateDt(LocalDateTime.now())
-                .build();
+  @Autowired ObjectMapper objectMapper;
 
-        given(beerService.getBeerbyId(any(UUID.class))).willReturn(Optional.of(mockBeerDTO));
+  @Test
+  void testGetBeerById() throws Exception {
+    BeerDTO mockBeerDTO =
+        BeerDTO.builder()
+            .id(UUID.randomUUID())
+            .version(1)
+            .beerName("Corona Extra")
+            .beerStyle(BeerStyle.LAGER)
+            .upc("123")
+            .price(new BigDecimal("4.00"))
+            .quantity(100)
+            .createdDt(LocalDateTime.now())
+            .updateDt(LocalDateTime.now())
+            .build();
 
-        mockMvc.perform(get(BeerController.BEER_PATH_ID, mockBeerDTO.getId())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(mockBeerDTO.getId().toString())))
-                .andExpect(jsonPath("$.beerName", is(mockBeerDTO.getBeerName())));
+    given(beerService.getBeerbyId(any(UUID.class))).willReturn(Optional.of(mockBeerDTO));
 
-        mockMvc.perform(get("/api/v1/beer/" + mockBeerDTO.getId())
+    mockMvc
+        .perform(
+            get(BeerController.BEER_PATH_ID, mockBeerDTO.getId())
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(mockBeerDTO.getId().toString())))
-                .andExpect(jsonPath("$.beerName", is(mockBeerDTO.getBeerName())));
-    }
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id", is(mockBeerDTO.getId().toString())))
+        .andExpect(jsonPath("$.beerName", is(mockBeerDTO.getBeerName())));
 
-    @Test
-    void getBeerByIdNotFound() throws Exception {
+    mockMvc
+        .perform(get("/api/v1/beer/" + mockBeerDTO.getId()).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.id", is(mockBeerDTO.getId().toString())))
+        .andExpect(jsonPath("$.beerName", is(mockBeerDTO.getBeerName())));
+  }
 
-        given(beerService.getBeerbyId(any(UUID.class))).willReturn(Optional.empty());
+  @Test
+  void getBeerByIdNotFound() throws Exception {
 
-        mockMvc.perform(get("/api/v1/beer/" + UUID.randomUUID()))
-                .andExpect(status().isNotFound());
-    }
+    given(beerService.getBeerbyId(any(UUID.class))).willReturn(Optional.empty());
+
+    mockMvc.perform(get("/api/v1/beer/" + UUID.randomUUID())).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testCreateBeerNullBeerName() throws Exception {
+    BeerDTO beerDTO = BeerDTO.builder().
+      id(UUID.randomUUID()).
+            build();
+
+    given(beerService.addBeer(any(BeerDTO.class))).willReturn(beerDTO);
+
+    mockMvc
+        .perform(
+            post(BeerController.BEER_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(beerDTO)))
+        .andExpect(status().isBadRequest());
+  }
 }
